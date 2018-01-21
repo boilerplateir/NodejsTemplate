@@ -1,14 +1,14 @@
-var async = require('async');
-var crypto = require('crypto');
-var nodemailer = require('nodemailer');
-var jwt = require('jsonwebtoken');
-var moment = require('moment');
-var request = require('request');
-var qs = require('querystring');
-var User = require('../models/User');
+const async = require('async');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+const moment = require('moment');
+const request = require('request');
+const qs = require('querystring');
+const User = require('../models/User');
 
 function generateToken(user) {
-  var payload = {
+  let payload = {
     iss: 'my.domain.com',
     sub: user.id,
     iat: moment().unix(),
@@ -37,7 +37,7 @@ exports.ensureAuthenticated = function(req, res, next) {
     req.assert('password', 'Password cannot be blank').notEmpty();
     req.sanitize('email').normalizeEmail({ remove_dots: false });
 
-    var errors = req.validationErrors();
+    let errors = req.validationErrors();
 
     if (errors) {
       return res.status(400).send(errors);
@@ -68,7 +68,7 @@ exports.signupPost = function(req, res, next) {
   req.assert('password', 'Password must be at least 4 characters long').len(4);
   req.sanitize('email').normalizeEmail({ remove_dots: false });
 
-  var errors = req.validationErrors();
+  let errors = req.validationErrors();
 
   if (errors) {
     return res.status(400).send(errors);
@@ -104,7 +104,7 @@ exports.accountPut = function(req, res, next) {
     req.sanitize('email').normalizeEmail({ remove_dots: false });
   }
 
-  var errors = req.validationErrors();
+  let errors = req.validationErrors();
 
   if (errors) {
     return res.status(400).send(errors);
@@ -179,7 +179,7 @@ exports.forgotPost = function(req, res, next) {
   req.assert('email', 'Email cannot be blank').notEmpty();
   req.sanitize('email').normalizeEmail({ remove_dots: false });
 
-  var errors = req.validationErrors();
+  let errors = req.validationErrors();
 
   if (errors) {
     return res.status(400).send(errors);
@@ -188,7 +188,7 @@ exports.forgotPost = function(req, res, next) {
   async.waterfall([
     function(done) {
       crypto.randomBytes(16, function(err, buf) {
-        var token = buf.toString('hex');
+        let token = buf.toString('hex');
         done(err, token);
       });
     },
@@ -205,14 +205,14 @@ exports.forgotPost = function(req, res, next) {
       });
     },
     function(token, user, done) {
-      var transporter = nodemailer.createTransport({
+      let transporter = nodemailer.createTransport({
         service: 'Mailgun',
         auth: {
           user: process.env.MAILGUN_USERNAME,
           pass: process.env.MAILGUN_PASSWORD
         }
       });
-      var mailOptions = {
+      let mailOptions = {
         to: user.email,
         from: 'support@yourdomain.com',
         subject: 'test',
@@ -236,7 +236,7 @@ exports.resetPost = function(req, res, next) {
   req.assert('password', 'Password must be at least 4 characters long').len(4);
   req.assert('confirm', 'Passwords must match').equals(req.body.password);
 
-  var errors = req.validationErrors();
+  let errors = req.validationErrors();
 
   if (errors) {
       return res.status(400).send(errors);
@@ -259,14 +259,14 @@ exports.resetPost = function(req, res, next) {
         });
     },
     function(user, done) {
-      var transporter = nodemailer.createTransport({
+      let transporter = nodemailer.createTransport({
         service: 'Mailgun',
         auth: {
           user: process.env.MAILGUN_USERNAME,
           pass: process.env.MAILGUN_PASSWORD
         }
       });
-      var mailOptions = {
+      let mailOptions = {
         from: 'support@yourdomain.com',
         to: user.email,
         subject: 'Your Boilerplate password has been changed',
@@ -285,11 +285,11 @@ exports.resetPost = function(req, res, next) {
  * Sign in with Facebook
  */
 exports.authFacebook = function(req, res) {
-  var profileFields = ['id', 'name', 'email', 'gender', 'location'];
-  var accessTokenUrl = 'https://graph.facebook.com/v2.5/oauth/access_token';
-  var graphApiUrl = 'https://graph.facebook.com/v2.5/me?fields=' + profileFields.join(',');
+  let profileFields = ['id', 'name', 'email', 'gender', 'location'];
+  let accessTokenUrl = 'https://graph.facebook.com/v2.5/oauth/access_token';
+  let graphApiUrl = 'https://graph.facebook.com/v2.5/me?fields=' + profileFields.join(',');
 
-  var params = {
+  let params = {
     code: req.body.code,
     client_id: req.body.clientId,
     client_secret: process.env.FACEBOOK_SECRET,
@@ -359,10 +359,10 @@ exports.authFacebookCallback = function(req, res) {
  * Sign in with Google
  */
 exports.authGoogle = function(req, res) {
-  var accessTokenUrl = 'https://accounts.google.com/o/oauth2/token';
-  var peopleApiUrl = 'https://www.googleapis.com/plus/v1/people/me/openIdConnect';
+  let accessTokenUrl = 'https://accounts.google.com/o/oauth2/token';
+  let peopleApiUrl = 'https://www.googleapis.com/plus/v1/people/me/openIdConnect';
 
-  var params = {
+  let params = {
     code: req.body.code,
     client_id: req.body.clientId,
     client_secret: process.env.GOOGLE_SECRET,
@@ -372,8 +372,8 @@ exports.authGoogle = function(req, res) {
 
   // Step 1. Exchange authorization code for access token.
   request.post(accessTokenUrl, { json: true, form: params }, function(err, response, token) {
-    var accessToken = token.access_token;
-    var headers = { Authorization: 'Bearer ' + accessToken };
+    let accessToken = token.access_token;
+    let headers = { Authorization: 'Bearer ' + accessToken };
 
     // Step 2. Retrieve user's profile information.
     request.get({ url: peopleApiUrl, headers: headers, json: true }, function(err, response, profile) {
@@ -427,10 +427,10 @@ exports.authGoogleCallback = function(req, res) {
  * Sign in with Github
  */
 exports.authGithub = function(req, res) {
-  var accessTokenUrl = 'https://github.com/login/oauth/access_token';
-  var userUrl = 'https://api.github.com/user';
+  let accessTokenUrl = 'https://github.com/login/oauth/access_token';
+  let userUrl = 'https://api.github.com/user';
 
-  var params = {
+  let params = {
     code: req.body.code,
     client_id: req.body.clientId,
     client_secret: process.env.GITHUB_SECRET,
@@ -440,8 +440,8 @@ exports.authGithub = function(req, res) {
 
   // Step 1. Exchange authorization code for access token.
   request.post(accessTokenUrl, { json: true, form: params }, function(err, response, token) {
-    var accessToken = token.access_token;
-    var headers = { 
+    let accessToken = token.access_token;
+    let headers = {
         Authorization: 'Bearer ' + accessToken,
         'User-Agent': 'Boilerplate'
       };
