@@ -2013,7 +2013,7 @@ var Header = function (_React$Component) {
           _react2.default.createElement(
             _reactRouter.Link,
             { to: '/signup', activeStyle: active },
-            'Sign up'
+            'Register'
           )
         )
       );
